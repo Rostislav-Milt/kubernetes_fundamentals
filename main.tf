@@ -86,7 +86,7 @@ resource "google_compute_instance" "master" {
   boot_disk {
     initialize_params {
       size = 20
-      image = "ubuntu-1804-lts"
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
     }
   }
 
@@ -113,7 +113,7 @@ resource "google_compute_instance" "worker" {
   boot_disk {
     initialize_params {
       size = 20
-      image = "ubuntu-1804-lts"
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
     }
   }
 
