@@ -1,31 +1,60 @@
 #!/bin/bash
 
-apt-get update && apt-get upgrade -y
-apt-get install vim -y
-apt-get install -y docker.io
-apt-get install bash-completion -y
+#re-run as root if not already (replaces interactive sudo su root)
+if [ "$(id -u)" -ne 0 ]; then
+    exec sudo "$0" "$@"
+fi
 
-echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
+#suppress all interactive prompts from apt and needrestart
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
 
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+#install software (step 3, 4)
+apt install apt-transport-https software-properties-common  ca-certificates tree socat -y
+swapoff -a
+modprobe overlay
+modprobe br_netfilter
+cat << EOF | tee /etc/sysctl.d/kubernetes.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+EOF
+sysctl --system
+mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+apt-get update &&  apt-get install containerd.io -y
+containerd config default | tee /etc/containerd/config.toml
+sed -e 's/SystemdCgroup = false/SystemdCgroup = true/g' -i /etc/containerd/config.toml
+systemctl restart containerd
 
+#get gpg keys (step 5)
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.34/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+#add k8s repo (step 6)
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+#install k8s (step 7, 8)
 apt-get update
-apt-get install -y kubeadm=1.18.1-00 kubelet=1.18.1-00 kubectl=1.18.1-00
-apt-mark hold kubelet kubeadm kubectl
+apt-get install -y kubeadm=1.34.2-1.1 kubelet=1.34.2-1.1 kubectl=1.34.2-1.1
 
-# Run as user
+#make sure version is held (step 9)
+apt-mark hold kubeadm kubelet kubectl
 
-# mkdir -p $HOME/.kube
-# sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-# sudo chown $(id -u):$(id -g) $HOME/.kube/config
+#add master IP to hosts (step 10,11,12)
+MASTER_IP=$(curl -sf -H "Metadata-Flavor: Google" \
+  http://metadata.google.internal/computeMetadata/v1/instance/attributes/master-ip)
+echo "$MASTER_IP k8scp" >> /etc/hosts
+echo "$MASTER_IP cp" >> /etc/hosts
 
-# kubectl apply -f calico.yaml
+#wait for master to publish join command, then join (step 13)
+until JOIN_CMD=$(gcloud compute project-info describe \
+  --format="value(commonInstanceMetadata.items[k8s-join-command])" 2>/dev/null) \
+  && echo "$JOIN_CMD" | grep -q "kubeadm join"; do
+  sleep 15
+done
 
-# echo "source <(kubectl completion bash)" >> ~/.bashrc
+eval "$JOIN_CMD"
 
-# Worker setup
-
-# CERT_HASH=$(openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //')
-# TOKEN=$(sudo kubeadm token create)
-
-# kubeadm join --token $TOKEN k8smaster:6443 --discovery-token-ca-cert-hash "sha256:$CERT_HASH"
+#alias (my preference)
+echo "alias k=kubectl" >> /home/student/.bashrc
