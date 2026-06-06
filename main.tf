@@ -1,5 +1,5 @@
 terraform {
-    required_providers {
+  required_providers {
     google = {
       source  = "hashicorp/google"
       version = "~> 7.35.0"
@@ -18,8 +18,8 @@ terraform {
 // Provider
 
 provider "google" {
-  project     = var.project
-  region      = "us-central1"
+  project = var.project
+  region  = "us-central1"
 }
 
 // Variables
@@ -42,6 +42,7 @@ variable "GOOGLE_CREDENTIALS" {
   description = "GCP service account credentials JSON."
   sensitive   = true
 }
+
 // Enable required APIs
 
 resource "google_project_service" "cloud_resource_manager_api" {
@@ -92,7 +93,10 @@ resource "google_compute_instance" "master" {
   name = "master"
   zone = "us-central1-f"
   machine_type = "n1-standard-2"
-
+  
+  service_account {
+    scopes = ["cloud-platform"]
+  }
   boot_disk {
     initialize_params {
       size = 20
@@ -119,7 +123,10 @@ resource "google_compute_instance" "worker" {
   name = "worker"
   zone = "us-central1-f"
   machine_type = "n1-standard-2"
-
+  
+  service_account {
+  scopes = ["cloud-platform"]
+  }
   boot_disk {
     initialize_params {
       size = 20
@@ -129,6 +136,7 @@ resource "google_compute_instance" "worker" {
 
   metadata = {
     "ssh-keys" = "${var.ssh-user}:${file(var.gce_ssh_pub_key_file)}"
+     "master-ip" = google_compute_instance.master.network_interface[0].network_ip
   }
 
   metadata_startup_script = file("./scripts/worker_startup.sh")

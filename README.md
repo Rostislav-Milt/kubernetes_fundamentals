@@ -35,6 +35,7 @@ Set up the permissions, give it permission to only those APIs that will be neede
 
 * Compute Engine Administrator: To create VMs, admin VPCs, subnets, etc.
 * Service Usage Admin: To enable GCP APIs.
+* Service Account User: To allow master to propagate join command for worker.
 
 ![sa-roles](imgs/03_sa_roles.png)
 
