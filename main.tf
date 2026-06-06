@@ -1,4 +1,11 @@
 terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 7.35.0"
+    }
+  }
+
   backend "remote" {
     organization = "laloloop"
 
@@ -11,9 +18,8 @@ terraform {
 // Provider
 
 provider "google" {
-  project     = var.project
-  region      = "europe-central2-a"
-  version = "~> 3.35.0"
+  project = var.project
+  region  = "europe-central2"
 }
 
 // Variables
@@ -30,6 +36,11 @@ variable "ssh-user" {
 variable "gce_ssh_pub_key_file" {
   description = "The public SSH key to log into the instances."
   default = "./id_ed25519.pub"
+}
+
+variable "GOOGLE_CREDENTIALS" {
+  description = "GCP service account credentials JSON."
+  sensitive   = true
 }
 
 // Enable required APIs
