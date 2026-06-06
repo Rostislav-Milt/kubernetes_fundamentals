@@ -10,7 +10,8 @@ export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 
 #install software (step 3, 4)
-apt install apt-transport-https software-properties-common  ca-certificates tree socat -y
+apt-get update && apt-get upgrade -y
+apt-get install apt-transport-https software-properties-common ca-certificates tree socat -y
 swapoff -a
 modprobe overlay
 modprobe br_netfilter
