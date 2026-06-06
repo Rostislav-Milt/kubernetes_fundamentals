@@ -12,7 +12,7 @@ terraform {
 
 provider "google" {
   project     = var.project
-  region      = "europe-central2"
+  region      = "europe-central2-a"
   version = "~> 3.35.0"
 }
 
@@ -80,7 +80,7 @@ resource "google_compute_firewall" "fw_lfclass" {
 
 resource "google_compute_instance" "master" {
   name = "master"
-  zone = "europe-central2"
+  zone = "europe-central2-a"
   machine_type = "n1-standard-2"
 
   boot_disk {
@@ -107,7 +107,7 @@ resource "google_compute_instance" "master" {
 
 resource "google_compute_instance" "worker" {
   name = "worker"
-  zone = "europe-central2"
+  zone = "europe-central2-a"
   machine_type = "n1-standard-2"
 
   boot_disk {
