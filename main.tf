@@ -130,6 +130,7 @@ resource "google_compute_instance" "worker" {
 
   metadata = {
     "ssh-keys" = "${var.ssh-user}:${file(var.gce_ssh_pub_key_file)}"
+     "master-ip" = google_compute_instance.master.network_interface[0].network_ip
   }
 
   metadata_startup_script = file("./scripts/worker_startup.sh")
