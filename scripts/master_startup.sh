@@ -94,6 +94,7 @@ echo "source <(kubectl completion bash)" >> /home/student/.bashrc
 
 #alias (my preference)
 echo "alias k=kubectl" >> /home/student/.bashrc
+source /home/student/.bashrc
 
 #generate join command and publish to project metadata (step 13 automation)
 JOIN_CMD=$(kubeadm token create --print-join-command)
