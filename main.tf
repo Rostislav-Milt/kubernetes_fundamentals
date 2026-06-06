@@ -12,7 +12,7 @@ terraform {
 
 provider "google" {
   project     = var.project
-  region      = "us-central1"
+  region      = "europe-central2"
   version = "~> 3.35.0"
 }
 
@@ -29,7 +29,7 @@ variable "ssh-user" {
 
 variable "gce_ssh_pub_key_file" {
   description = "The public SSH key to log into the instances."
-  default = "./id_rsa.pub"
+  default = "./id_ed25519.pub"
 }
 
 // Enable required APIs
@@ -80,7 +80,7 @@ resource "google_compute_firewall" "fw_lfclass" {
 
 resource "google_compute_instance" "master" {
   name = "master"
-  zone = "us-central1-f"
+  zone = "europe-central2"
   machine_type = "n1-standard-2"
 
   boot_disk {
@@ -107,7 +107,7 @@ resource "google_compute_instance" "master" {
 
 resource "google_compute_instance" "worker" {
   name = "worker"
-  zone = "us-central1-f"
+  zone = "europe-central2"
   machine_type = "n1-standard-2"
 
   boot_disk {
