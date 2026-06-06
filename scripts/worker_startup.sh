@@ -59,3 +59,4 @@ eval "$JOIN_CMD"
 
 #alias (my preference)
 echo "alias k=kubectl" >> /home/student/.bashrc
+source /home/student/.bashrc
