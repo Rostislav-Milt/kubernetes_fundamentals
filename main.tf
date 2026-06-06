@@ -1,4 +1,11 @@
 terraform {
+    required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 3.35.0"
+    }
+  }
+
   backend "remote" {
     organization = "laloloop"
 
@@ -12,8 +19,7 @@ terraform {
 
 provider "google" {
   project     = var.project
-  region      = "europe-central2-a"
-  version = "~> 3.35.0"
+  region      = "us-central1"
 }
 
 // Variables
@@ -29,9 +35,13 @@ variable "ssh-user" {
 
 variable "gce_ssh_pub_key_file" {
   description = "The public SSH key to log into the instances."
-  default = "./id_ed25519.pub"
+  default = "./id_rsa.pub"
 }
 
+variable "GOOGLE_CREDENTIALS" {
+  description = "GCP service account credentials JSON."
+  sensitive   = true
+}
 // Enable required APIs
 
 resource "google_project_service" "cloud_resource_manager_api" {
@@ -80,7 +90,7 @@ resource "google_compute_firewall" "fw_lfclass" {
 
 resource "google_compute_instance" "master" {
   name = "master"
-  zone = "europe-central2-a"
+  zone = "us-central1-f"
   machine_type = "n1-standard-2"
 
   boot_disk {
@@ -107,7 +117,7 @@ resource "google_compute_instance" "master" {
 
 resource "google_compute_instance" "worker" {
   name = "worker"
-  zone = "europe-central2-a"
+  zone = "us-central1-f"
   machine_type = "n1-standard-2"
 
   boot_disk {
