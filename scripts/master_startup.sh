@@ -5,6 +5,8 @@ if [ "$(id -u)" -ne 0 ]; then
     exec sudo "$0" "$@"
 fi
 
+set -e
+
 #suppress all interactive prompts from apt and needrestart
 export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a

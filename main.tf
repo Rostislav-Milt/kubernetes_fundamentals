@@ -93,7 +93,10 @@ resource "google_compute_instance" "master" {
   name = "master"
   zone = "europe-central2-a"
   machine_type = "n1-standard-2"
-
+  
+  service_account {
+    scopes = ["cloud-platform"]
+  }
   boot_disk {
     initialize_params {
       size = 20
@@ -120,7 +123,10 @@ resource "google_compute_instance" "worker" {
   name = "worker"
   zone = "europe-central2-a"
   machine_type = "n1-standard-2"
-
+  
+  service_account {
+  scopes = ["cloud-platform"]
+  }
   boot_disk {
     initialize_params {
       size = 20
